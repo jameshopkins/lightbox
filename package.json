@@ -1,0 +1,22 @@
+{
+    "name": "lightbox",
+    "version": "0.0.0",
+    "description": "Example package.json. Feel free to copy!",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "{{ git.SSH-URL }}"
+    },
+    "scripts": {
+      "test": "component test quick",
+      "test:tdd": "component test tdd",
+      "build": "component build",
+      "start": "component serve",
+      "start:quick": "component serve quick"
+    },
+    "devDependencies": {
+      "browserify-istanbul": "^0.2.0",
+      "component-helper" : "^1.1.2"
+    },
+    "author": "{{ git.author }}"
+}
