@@ -14,6 +14,8 @@
         "!src/**/*"
     ],
     "devDependencies": {
-        "bskyb-core": "~0.0.4"
+        "bskyb-core": "~0.0.4",
+        "bskyb-hash-manager": "0.2.3",
+        "bskyb-polyfill": "0.2.3"
     }
 }

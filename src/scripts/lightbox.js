@@ -1,28 +1,158 @@
-// By default JS dependency is handled using CommonJS and browserify
-// please see 'API.md#scripts' for more info
-//
-// You may need other components. i.e. Run and uncomment the following :
-// $ bower install dependency-name --save
-// var dependency = require('../../bower_components/dependency-name/src/scripts/index');
+require('../../bower_components/bskyb-polyfill/src/scripts/polyfill');
 
+var core = require('../../bower_components/bskyb-core/src/scripts/core');
+var event = core.event;
 
-//example function
-function Main(){
-    this.version = require('./utils/version.js');//keep this : each component exposes its version
-}
+var lightbox = (function() {
 
-Main.prototype.sum = function(args){
-    var total = 0;
-    args.forEach(function(int){
-        total += int;
+  function updateConfig (currentConfig, options) {
+    var config = {
+      isOpen: false,
+      contentId: currentConfig.contentId,
+      eventRegistry: {
+        close: currentConfig.eventRegistry.close.slice(0),
+        open: currentConfig.eventRegistry.open.slice(0),
+        attach: currentConfig.eventRegistry.attach.slice(0),
+      }
+    };
+    for (var option in options) {
+      config[option] = options[option]
+    }
+
+    return new Lightbox(config);
+  };
+
+  observers = {
+    add: function (currentConfig, eventType, cb) {
+      var config = {
+        isOpen: false,
+        contentId: currentConfig.contentId,
+        eventRegistry: {
+          close: currentConfig.eventRegistry.close.slice(0),
+          open: currentConfig.eventRegistry.open.slice(0),
+          attach: currentConfig.eventRegistry.attach.slice(0),
+        }
+      }
+      config.eventRegistry[eventType].push(cb);
+      return new Lightbox(config);
+    },
+    notify: function(instance, eventType) {
+      instance.config.eventRegistry[eventType].forEach(function(cb) {
+        cb(instance);
+      });
+    }
+  };
+
+  classes = {
+    open: 'lightbox-open',
+    main: 'lightbox'
+  };
+
+  function Lightbox (config) {
+
+    this.version = require('./utils/version.js');
+
+    defaultConfig = {
+      isOpen: false,
+      eventRegistry: {
+        close: [],
+        open: [],
+        attach: []
+      }
+    };
+
+    this.config = config || defaultConfig;
+
+  };
+
+  Lightbox.prototype._addHTML = function () {
+
+    var lightboxContent = document.getElementById(this.config.contentId);
+
+    var lightbox = document.createElement('div');
+    lightbox.classList.add('lightbox', this.config.contentId + '-lightbox');
+    lightbox.innerHTML = '<div class="skycom-container lightbox-container"><div class="lightbox-content" role="dialog"><button class="close">Close</button>' + lightboxContent.outerHTML + '</div></div>';
+
+    lightboxContent.parentNode.replaceChild(lightbox, lightboxContent);
+
+    var closeButton = lightbox.querySelector('button.close');
+    var lightboxContent = lightbox.querySelector('.lightbox-content');
+
+    lightbox.addEventListener('click', function(e) {
+      if (e.target.classList.contains('close') || e.target.classList.contains('lightbox')) {
+        e.preventDefault();
+        this.close();
+      }
+    }.bind(this));
+
+  };
+
+  Lightbox.prototype.attach = function (options) {
+
+    var updatedConfig = updateConfig(this.config, {
+      contentId: options.id
     });
-    return total;
-};
 
+    updatedConfig._addHTML();
 
-//example export
-module.exports = Main;
+    observers.notify(updatedConfig, 'attach');
 
+    return updatedConfig;
 
-//Globals : if required
-//window['lightbox'] = module.exports;
+  };
+
+  Lightbox.prototype.on = function (eventType, callback) {
+    return observers.add(this.config, eventType, callback);
+  };
+
+  Lightbox.prototype.toggleOn = function (eventType) {
+    var element = document.querySelector('[data-modal=' + this.config.contentId + ']');
+    element.addEventListener(eventType, function() {
+      this.toggle()
+    }.bind(this));
+  };
+
+  Lightbox.prototype.toggle = function () {
+
+    if (this.config.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
+
+  };
+
+  Lightbox.prototype.open = function () {
+
+    var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
+
+    lightbox.classList.add(classes.open);
+
+    observers.notify(this, 'open');
+    this.config.isOpen = true;
+
+    return this;
+
+  };
+
+  Lightbox.prototype.close = function () {
+
+    var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
+
+    lightbox.classList.remove(classes.open);
+
+    observers.notify(this, 'close');
+    this.config.isOpen = false;
+
+    return this;
+
+  };
+
+  return new Lightbox();
+
+}());
+
+module.exports = lightbox;
+
+if (typeof skyComponents === "undefined") window.skyComponents = {};
+skyComponents['lightbox'] = module.exports;

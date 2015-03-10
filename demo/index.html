@@ -25,7 +25,8 @@
     </h1>
 
     <p>
-        Demo component here!
+        <div id="demo">It works!<a href="#" onClick="alert('sds')">dsds</a></div>
+        <button data-modal="demo">toggle the modal!</button>
     </p>
 </div>
 
@@ -33,3 +34,31 @@
 <div class="demo-container">
     {{> _includes/**/*.html }}
 </div>
+
+<script type="text/javascript">
+
+  var lightbox = skyComponents.lightbox
+    .on('close', function() {
+      //console.log('mooo')
+    })
+
+  var stillNeedHelp = lightbox
+    .on('close', function(istance) { console.log('mental') })
+    .on('open', function() {console.log('dsdd')})
+    .on('attach', function(instance) {
+      function hello (contentId) {
+        if (window.location.hash.substring(2) === contentId) {
+          instance.open();
+        } else {
+          instance.close();
+        }
+      };
+      hello(instance.config.contentId);
+      window.addEventListener('hashchange', function(hash) {
+        hello(instance.config.contentId);
+      });
+    })
+    .attach({id: 'demo'})
+    .toggleOn('click')
+
+</script>
