@@ -9,12 +9,14 @@ var lightbox = (function() {
     var config = {
       isOpen: false,
       contentId: currentConfig.contentId,
+      toggle: currentConfig.toggle,
       eventRegistry: {
         close: currentConfig.eventRegistry.close.slice(0),
         open: currentConfig.eventRegistry.open.slice(0),
         attach: currentConfig.eventRegistry.attach.slice(0),
       }
     };
+
     for (var option in options) {
       config[option] = options[option]
     }
@@ -27,6 +29,7 @@ var lightbox = (function() {
       var config = {
         isOpen: false,
         contentId: currentConfig.contentId,
+        toggle: currentConfig.toggle,
         eventRegistry: {
           close: currentConfig.eventRegistry.close.slice(0),
           open: currentConfig.eventRegistry.open.slice(0),
@@ -54,6 +57,7 @@ var lightbox = (function() {
 
     defaultConfig = {
       isOpen: false,
+      toggle: false,
       eventRegistry: {
         close: [],
         open: [],
@@ -65,7 +69,18 @@ var lightbox = (function() {
 
   };
 
+  Lightbox.prototype.settings = function (settings) {
+    return updateConfig(this.config, settings);
+  };
+
   Lightbox.prototype._addHTML = function () {
+
+    if (this.config.toggle) {
+      var element = document.querySelector('[data-modal=' + this.config.contentId + ']');
+      element.addEventListener('click', function() {
+        this.toggle()
+      }.bind(this));
+    }
 
     var lightboxContent = document.getElementById(this.config.contentId);
 
@@ -87,10 +102,10 @@ var lightbox = (function() {
 
   };
 
-  Lightbox.prototype.attach = function (options) {
+  Lightbox.prototype.attach = function (id) {
 
     var updatedConfig = updateConfig(this.config, {
-      contentId: options.id
+      contentId: id
     });
 
     updatedConfig._addHTML();
@@ -103,13 +118,6 @@ var lightbox = (function() {
 
   Lightbox.prototype.on = function (eventType, callback) {
     return observers.add(this.config, eventType, callback);
-  };
-
-  Lightbox.prototype.toggleOn = function (eventType) {
-    var element = document.querySelector('[data-modal=' + this.config.contentId + ']');
-    element.addEventListener(eventType, function() {
-      this.toggle()
-    }.bind(this));
   };
 
   Lightbox.prototype.toggle = function () {

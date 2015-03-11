@@ -25,7 +25,7 @@
     </h1>
 
     <p>
-        <div id="demo">It works!<a href="#" onClick="alert('sds')">dsds</a></div>
+        <div id="demo">It works!<a href="#" onClick="alert('sds')">dsds</a><div style="height: 1000px; background: lime;">It</div></div>
         <button data-modal="demo">toggle the modal!</button>
     </p>
 </div>
@@ -37,12 +37,14 @@
 
 <script type="text/javascript">
 
+
   var lightbox = skyComponents.lightbox
     .on('close', function() {
       //console.log('mooo')
     })
 
   var stillNeedHelp = lightbox
+    .settings({ toggle: true })
     .on('close', function(istance) { console.log('mental') })
     .on('open', function() {console.log('dsdd')})
     .on('attach', function(instance) {
@@ -58,7 +60,6 @@
         hello(instance.config.contentId);
       });
     })
-    .attach({id: 'demo'})
-    .toggleOn('click')
+    .attach('demo')
 
 </script>
