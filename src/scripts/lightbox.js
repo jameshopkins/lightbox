@@ -8,8 +8,10 @@ var lightbox = (function() {
   function updateConfig (currentConfig, options) {
     var config = {
       isOpen: false,
+      closeButton: currentConfig.closeButton,
       contentId: currentConfig.contentId,
       toggle: currentConfig.toggle,
+      loadPersist: currentConfig.loadPersist,
       eventRegistry: {
         close: currentConfig.eventRegistry.close.slice(0),
         open: currentConfig.eventRegistry.open.slice(0),
@@ -28,8 +30,10 @@ var lightbox = (function() {
     add: function (currentConfig, eventType, cb) {
       var config = {
         isOpen: false,
+        closeButton: currentConfig.closeButton,
         contentId: currentConfig.contentId,
         toggle: currentConfig.toggle,
+        loadPersist: currentConfig.loadPersist,
         eventRegistry: {
           close: currentConfig.eventRegistry.close.slice(0),
           open: currentConfig.eventRegistry.open.slice(0),
@@ -58,6 +62,7 @@ var lightbox = (function() {
     defaultConfig = {
       isOpen: false,
       toggle: false,
+      loadPersist: false,
       eventRegistry: {
         close: [],
         open: [],
@@ -73,7 +78,7 @@ var lightbox = (function() {
     return updateConfig(this.config, settings);
   };
 
-  Lightbox.prototype._addHTML = function () {
+  Lightbox.prototype._buildDOM = function () {
 
     if (this.config.toggle) {
       var element = document.querySelector('[data-modal=' + this.config.contentId + ']');
@@ -84,9 +89,15 @@ var lightbox = (function() {
 
     var lightboxContent = document.getElementById(this.config.contentId);
 
+    var closeButton = '';
+    if (this.config.closeButton !== null) {
+      closeButton = '<button class="close">Close</button>';
+    }
+
     var lightbox = document.createElement('div');
+
     lightbox.classList.add('lightbox', this.config.contentId + '-lightbox');
-    lightbox.innerHTML = '<div class="skycom-container lightbox-container"><div class="lightbox-content" role="dialog"><button class="close">Close</button>' + lightboxContent.outerHTML + '</div></div>';
+    lightbox.innerHTML = '<div class="skycom-container lightbox-container"><div class="lightbox-content" role="dialog">' + closeButton + lightboxContent.outerHTML + '</div></div>';
 
     lightboxContent.parentNode.replaceChild(lightbox, lightboxContent);
 
@@ -108,7 +119,7 @@ var lightbox = (function() {
       contentId: id
     });
 
-    updatedConfig._addHTML();
+    updatedConfig._buildDOM();
 
     observers.notify(updatedConfig, 'attach');
 
@@ -132,6 +143,10 @@ var lightbox = (function() {
 
   Lightbox.prototype.open = function () {
 
+    if (typeof this.config.contentId === 'undefined') {
+      throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
+    }
+
     var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
 
     lightbox.classList.add(classes.open);
@@ -144,6 +159,10 @@ var lightbox = (function() {
   };
 
   Lightbox.prototype.close = function () {
+
+    if (typeof this.config.contentId === 'undefined') {
+      throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
+    }
 
     var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
 

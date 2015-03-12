@@ -38,28 +38,40 @@
 <script type="text/javascript">
 
 
+  var hashManager = {
+
+  };
+
+  function hello (contentId, lightbox) {
+    if (window.location.hash.substring(2) === contentId) {
+      lightbox.open();
+    } else {
+      lightbox.close();
+    }
+  };
+
   var lightbox = skyComponents.lightbox
     .on('close', function() {
       //console.log('mooo')
     })
 
   var stillNeedHelp = lightbox
-    .settings({ toggle: true })
+    .settings({ toggle: true, loadPersist: true })
     .on('close', function(istance) { console.log('mental') })
-    .on('open', function() {console.log('dsdd')})
-    .on('attach', function(instance) {
-      function hello (contentId) {
-        if (window.location.hash.substring(2) === contentId) {
-          instance.open();
-        } else {
-          instance.close();
-        }
+    .on('open', function(lightbox) {
+      if (lightbox.config.loadPersist && lightbox.config.toggle) {
+        console.log(lightbox.config.contentId)
+      }
+    })
+    .on('attach', function(lightbox) {
+      if (lightbox.config.loadPersist) {
+        hello(lightbox.config.contentId, lightbox);
+        window.addEventListener('hashchange', function(hash) {
+          hello(instance.config.contentId, lightbox);
+        });
       };
-      hello(instance.config.contentId);
-      window.addEventListener('hashchange', function(hash) {
-        hello(instance.config.contentId);
-      });
     })
     .attach('demo')
+    .open()
 
 </script>
