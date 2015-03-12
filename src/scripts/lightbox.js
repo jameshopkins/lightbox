@@ -3,6 +3,12 @@ require('../../bower_components/bskyb-polyfill/src/scripts/polyfill');
 var core = require('../../bower_components/bskyb-core/src/scripts/core');
 var event = core.event;
 
+/**
+TODO:
+  - Add validation to selector
+  - Fixed position: fixed scroll top
+**/
+
 var lightbox = (function() {
 
   function updateConfig (currentConfig, options) {
@@ -70,6 +76,8 @@ var lightbox = (function() {
       }
     };
 
+    this.scrollY = 0;
+
     this.config = config || defaultConfig;
 
   };
@@ -80,34 +88,44 @@ var lightbox = (function() {
 
   Lightbox.prototype._buildDOM = function () {
 
+    var lightboxContent = document.getElementById(this.config.contentId),
+        toggleControl = document.querySelector('[data-lightbox-toggle-control=' + this.config.contentId + ']'),
+        closeButton = '',
+        lightbox = document.createElement('div');
+
+    if (!lightboxContent) {
+      throw new Error('The lightbox content cannot be found.')
+    }
+
     if (this.config.toggle) {
-      var element = document.querySelector('[data-modal=' + this.config.contentId + ']');
-      element.addEventListener('click', function() {
-        this.toggle()
+      if (!toggleControl) {
+        throw new Error('The toggle control cannot be found. Check a DOM node exists that has a [data-lightbox-toggle-control] attribute whose value corresponds to the ID of the lightbox content')
+      }
+      toggleControl.addEventListener('click', function(e) {
+        this.open('control');
       }.bind(this));
     }
 
-    var lightboxContent = document.getElementById(this.config.contentId);
+    lightboxContent.parentNode.removeChild(lightboxContent);
 
-    var closeButton = '';
     if (this.config.closeButton !== null) {
-      closeButton = '<button class="close">Close</button>';
+      closeButton = '<button data-lightbox-control="close" class="close">Close</button>';
     }
 
-    var lightbox = document.createElement('div');
-
+    // Transform the content
     lightbox.classList.add('lightbox', this.config.contentId + '-lightbox');
+    lightbox.setAttribute('data-lightbox-control', 'overlay');
     lightbox.innerHTML = '<div class="skycom-container lightbox-container"><div class="lightbox-content" role="dialog">' + closeButton + lightboxContent.outerHTML + '</div></div>';
 
-    lightboxContent.parentNode.replaceChild(lightbox, lightboxContent);
+    document.body.appendChild(lightbox);
 
-    var closeButton = lightbox.querySelector('button.close');
     var lightboxContent = lightbox.querySelector('.lightbox-content');
 
+    // Set up close actions
     lightbox.addEventListener('click', function(e) {
       if (e.target.classList.contains('close') || e.target.classList.contains('lightbox')) {
         e.preventDefault();
-        this.close();
+        this.close(e.target.getAttribute('data-lightbox-control'));
       }
     }.bind(this));
 
@@ -120,7 +138,6 @@ var lightbox = (function() {
     });
 
     updatedConfig._buildDOM();
-
     observers.notify(updatedConfig, 'attach');
 
     return updatedConfig;
@@ -141,7 +158,7 @@ var lightbox = (function() {
 
   };
 
-  Lightbox.prototype.open = function () {
+  Lightbox.prototype.open = function (emitter) {
 
     if (typeof this.config.contentId === 'undefined') {
       throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
@@ -151,25 +168,43 @@ var lightbox = (function() {
 
     lightbox.classList.add(classes.open);
 
-    observers.notify(this, 'open');
+    // Fix the viewport
+    this.scrollY = window.scrollY;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.marginTop = - this.scrollY + 'px';
+
     this.config.isOpen = true;
+    this.config.emitter = emitter || 'system'
+    observers.notify(this, 'open');
 
     return this;
 
   };
 
-  Lightbox.prototype.close = function () {
+  Lightbox.prototype.close = function (emitter) {
 
     if (typeof this.config.contentId === 'undefined') {
       throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
     }
 
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.marginTop = '';
+
+    window.scrollTo(0, this.scrollY + 'px');
+
     var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
 
     lightbox.classList.remove(classes.open);
 
-    observers.notify(this, 'close');
     this.config.isOpen = false;
+    this.config.emitter = emitter || 'system'
+
+    observers.notify(this, 'close');
 
     return this;
 

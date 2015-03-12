@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div class="demo-container">
+<div class="demo-container" style="height: 1000px">
     <h1>lightbox
         <small  class="demo-version text--secondary">v{{ site.version }}
             <a href="{{ git.HTTPS-URL }}" class="text--secondary">
@@ -25,8 +25,12 @@
     </h1>
 
     <p>
-        <div id="demo">It works!<a href="#" onClick="alert('sds')">dsds</a><div style="height: 1000px; background: lime;">It</div></div>
-        <button data-modal="demo">toggle the modal!</button>
+        <div id="demo">It works!<a href="#" onClick="alert('sds')">dsds</a><div style="height: 100px; background: lime;">It</div></div>
+        <button data-lightbox-control="toggle" data-lightbox-toggle-control="demo">toggle the modal!</button>
+
+        <div id="hello">Mooki</div>
+        <button data-lightbox-toggle-control="hello">toggle hello the modal!</button>
+
     </p>
 </div>
 
@@ -37,11 +41,6 @@
 
 <script type="text/javascript">
 
-
-  var hashManager = {
-
-  };
-
   function hello (contentId, lightbox) {
     if (window.location.hash.substring(2) === contentId) {
       lightbox.open();
@@ -51,25 +50,44 @@
   };
 
   var lightbox = skyComponents.lightbox
+    .settings({ toggle: true, loadPersist: true })
     .on('close', function() {
       //console.log('mooo')
     })
+    .attach('hello')
+    //.open()
 
   var stillNeedHelp = lightbox
     .settings({ toggle: true, loadPersist: true })
-    .on('close', function(istance) { console.log('mental') })
-    .on('open', function(lightbox) {
-      if (lightbox.config.loadPersist && lightbox.config.toggle) {
-        console.log(lightbox.config.contentId)
+    .on('close', function(lightbox) {
+      switch (lightbox.config.emitter) {
+        case 'close':
+          console.log('the top right close button closed this');
+          break;
+        case 'overlay':
+          console.log('the overlay closed this')
+          break;
       }
     })
+    .on('open', function(lightbox) {
+      switch (lightbox.config.emitter) {
+        case 'system':
+          console.log('a system event opened this')
+          break;
+        case 'control':
+          console.log('the control opened this')
+      }
+      //if (lightbox.config.loadPersist && lightbox.config.toggle) {
+      //  console.log(lightbox.config.contentId)
+      //}
+    })
     .on('attach', function(lightbox) {
-      if (lightbox.config.loadPersist) {
-        hello(lightbox.config.contentId, lightbox);
-        window.addEventListener('hashchange', function(hash) {
-          hello(instance.config.contentId, lightbox);
-        });
-      };
+      //if (lightbox.config.loadPersist) {
+      //  hello(lightbox.config.contentId, lightbox);
+      //  window.addEventListener('hashchange', function(hash) {
+      //    hello(instance.config.contentId, lightbox);
+      //  });
+      //};
     })
     .attach('demo')
     .open()
