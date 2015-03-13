@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div class="demo-container" style="height: 1000px">
+<div class="demo-container">
     <h1>lightbox
         <small  class="demo-version text--secondary">v{{ site.version }}
             <a href="{{ git.HTTPS-URL }}" class="text--secondary">
@@ -25,11 +25,14 @@
     </h1>
 
     <p>
-        <div id="demo">It works!<a href="#" onClick="alert('sds')">dsds</a><div style="height: 100px; background: lime;">It</div></div>
-        <button data-lightbox-control="toggle" data-lightbox-toggle-control="demo">toggle the modal!</button>
+        <div id="demo-one"><h1>Content for demo one</h1></div>
+        <button data-lightbox-control="toggle" data-lightbox-toggle-control="demo-one">Demo one</button>
 
-        <div id="hello">Mooki</div>
-        <button data-lightbox-toggle-control="hello">toggle hello the modal!</button>
+        <div id="demo-two"><h1>Content for demo two</h1></div>
+        <button data-lightbox-toggle-control="demo-two">demo two</button>
+
+        <div id="demo-three"><h1>Content for demo three</h1></div>
+        <button data-lightbox-toggle-control="demo-fail">demo three</button>
 
     </p>
 </div>
@@ -41,7 +44,7 @@
 
 <script type="text/javascript">
 
-  function hello (contentId, lightbox) {
+  /*function hello (contentId, lightbox) {
     if (window.location.hash.substring(2) === contentId) {
       lightbox.open();
     } else {
@@ -54,11 +57,11 @@
     .on('close', function() {
       //console.log('mooo')
     })
-    .attach('hello')
+    .attach('demo-one')
     //.open()
 
   var stillNeedHelp = lightbox
-    .settings({ toggle: true, loadPersist: true })
+    .settings({ toggle: true })
     .on('close', function(lightbox) {
       switch (lightbox.config.emitter) {
         case 'close':
@@ -89,7 +92,7 @@
       //  });
       //};
     })
-    .attach('demo')
-    .open()
+    .attach('demo-two')
+    .open()*/
 
 </script>
