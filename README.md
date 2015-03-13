@@ -22,13 +22,12 @@
 * includes a boolean flag describing bookmarkable state
 * includes a callback that's fired when the lightbox is opened
 * attaches to a DOM node with an ID attribute value of 'demo-one'
-
-      lightbox
-        .settings({ toggle: true, loadPersist: true })
-        .on('open', function() {
-          console.log('it has opened!')
-        })
-        .attach('demo-one')
+        lightbox
+          .settings({ toggle: true, loadPersist: true })
+          .on('open', function() {
+            console.log('it has opened!')
+          })
+          .attach('demo-one')
 
 ### Instance composition ###
 It's easy to compose lightbox from another predefined instance.
