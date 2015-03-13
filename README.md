@@ -1,49 +1,49 @@
-[lightbox]({{ git.io-URL }})  [![Circle CI](https://circleci.com/gh/{{ git.username }}/lightbox/tree/master.svg?style=svg)](https://circleci.com/gh/{{ git.username }}/lightbox/tree/master)
+[lightbox]({{ git.io-URL }})
 ========================
 
-> Please take a look at the [demo page]({{ git.io-URL }})
+> An implementation comprising chainable operations, each representing a lightbox customisation, resulting .
 
-## Quick-Start
+## API ##
 
-Include the lightbox assets in your project either as **Static Resources**
+### .attach(id) ###
+    @id {String} The ID of the content that the lightbox will encapsulate
 
-```html
-<link rel="stylesheet" href="http://web-toolkit.global.sky.com/components/lightbox/0.0.1/styles/lightbox.min.css" />
-<script type="text/javascript" src="http://web-toolkit.global.sky.com/components/lightbox/0.0.1/scripts/lightbox.min.js"></script>
-```
+### .open([emitter]) ###
+    emitter {String}, Optional, Default: system
 
-or alternatively, **Via Bower**
+### .close([emitter]) ###
+### .on(eventType, callback) ###
+### .settings() ###
 
- * Run: `bower install --save-dev bskyb-lightbox`
- * Include Sass: `@import 'bower_components/bskyb-lightbox/src/styles/lightbox';`
- * Include JS: `var lightbox = require('../../bower_components/bskyb-lightbox/src/scripts/lightbox');`
+## Examples ##
 
+### Basic, single instance ###
+* can be activated by an element
+* includes a boolean flag describing bookmarkable state
+* includes a callback that's fired when the lightbox is opened
+* attaches to a DOM node with an ID attribute value of 'demo-one'
 
-#### Dependencies
+      lightbox
+        .settings({ toggle: true, loadPersist: true })
+        .on('open', function() {
+          console.log('it has opened!')
+        })
+        .attach('demo-one')
 
-This component relies on other components and you must also include these in your project.
+### Instance composition ###
+It's easy to compose lightbox from another predefined instance.
+* includes a callback that's fired when the lightbox becomes attached to it's DOM node
 
- * [Dependency Name](https://github.com/skyglobal/DependencyName)
+      var lightbox
+        .on('attach', function() {
+          console.log('it has become attached!');
+        })
+* compose instance from `lightbox`
+* includes a callback that's fired when the lightbox becomes attached to it's DOM node
+* opens upon instantiation
 
-#### Developer Notes
-
-Choose a type of lightbox component and copy the relevant html.
- * [example](demo/_includes/example.html)
- * [example](demo/_includes/example.html),
-
-## Contribution
-
-Components depends on collaboration between developers. Contributions of any size are actively encouraged.
-
-To see how to build this component locally, read the [contribution guidelines](CONTRIBUTING.md).
-
-## Browser Support
-
-(To support IE8 please add [ployfill](https://github.com/skyglobal/polyfill) to your site)
-
- * IE9 +
- * Safari 7 +
- * Latest Firefox
- * Latest Chrome
- * Latest Mobile Safari
- * Latest Mobile Chrome
+      var contextSpecificLightbox = lightbox
+        .on('attach', function() {
+          console.log('the new instance has become attach!');
+        })
+        .open()
