@@ -1,5 +1,5 @@
-[lightbox]({{ git.io-URL }})
-========================
+# Lightbox #
+[![Circle CI](https://circleci.com/gh/jameshopkins/lightbox/tree/master.svg?style=svg)](https://circleci.com/gh/jameshopkins/lightbox/tree/master)
 
 > An implementation comprising chainable operations, each representing a lightbox customisation, resulting .
 
