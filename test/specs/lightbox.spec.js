@@ -12,7 +12,7 @@ describe('Lightbox', function () {
     var base, composed;
 
     afterEach(function() {
-      base = second = null
+      base = composed = null
     });
 
     describe('Component-level immutability', function () {
@@ -21,7 +21,7 @@ describe('Lightbox', function () {
 
       it('calling .settings() returns a new lightbox instance', function () {
 
-        base = local['lightbox'].settings({ toggle: true });
+        base = local['lightbox'].settings({ DOMActivation: true });
         composed = base.settings({ loadPersist: true });
         expect(base.config.loadPersist).toBeFalsy();
 
@@ -58,6 +58,30 @@ describe('Lightbox', function () {
         expect(base.config.emitter).toEqual('system');
 
       });
+
+    });
+
+  });
+
+  describe('Observers', function () {
+
+    it('event callbacks are executed', function () {
+
+      var callbackOpen = jasmine.createSpy('opened');
+      var callbackClose = jasmine.createSpy('closed');
+      var callbackAttach = jasmine.createSpy('attached');
+
+      base = local['lightbox']
+        .on('open', callbackOpen)
+        .on('close', callbackClose)
+        .on('attach', callbackAttach)
+        .attach('observers-one');
+
+      base.open().close();
+
+      expect(callbackOpen).toHaveBeenCalled();
+      expect(callbackClose).toHaveBeenCalled();
+      expect(callbackAttach).toHaveBeenCalled();
 
     });
 
@@ -102,33 +126,33 @@ describe('Lightbox', function () {
 
     });
 
-    it('specifying a non-existent DOM node that acts as a toggle control throws an error', function () {
+    it('specifying a non-existent DOM node that acts as a DOMActivation control throws an error', function () {
 
-      var lightbox = local['lightbox'].settings({ toggle: true })
+      var lightbox = local['lightbox'].settings({ DOMActivation: true })
       expect(function () {
         lightbox.attach('demo-three')._buildDOM()
-      }).toThrow(new Error('The toggle control cannot be found. Check a DOM node exists that has a [data-lightbox-toggle-control] attribute whose value corresponds to the ID of the lightbox content'));
+      }).toThrow(new Error('The DOMActivation control cannot be found. Check a DOM node exists that has a [data-lightbox-activation-control] attribute whose value corresponds to the ID of the lightbox content'));
 
     });
 
     it('clicking the activating element opens the lightbox', function () {
 
       var lightbox = local['lightbox'];
-      lightbox.settings({ toggle: true }).attach('demo-two')
-      var activatingElement = document.querySelector('[data-lightbox-toggle-control="demo-two"]');
+      lightbox.settings({ DOMActivation: true }).attach('demo-two')
+      var activatingElement = document.querySelector('[data-lightbox-activation-control="demo-two"]');
       activatingElement.click();
       var overlay = document.querySelector('.demo-two-lightbox');
       expect(overlay.classList.contains('lightbox-open')).toBeTruthy();
 
     });
 
-    it('clicking the overlay closes the lightbox', function () {
+    //it('clicking the overlay closes the lightbox', function () {
 
-      var lightbox = local['lightbox'];
-      lightbox.attach('demo-two')
-      var overlay = document.querySelector('.demo-two-lightbox');
+    //  var lightbox = local['lightbox'];
+    //  lightbox.attach('demo-two')
+    //  var overlay = document.querySelector('.demo-two-lightbox');
 
-    });
+    //});
 
   });
 
