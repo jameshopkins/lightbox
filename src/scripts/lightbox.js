@@ -4,9 +4,9 @@ var core = require('../../bower_components/bskyb-core/src/scripts/core');
 var event = core.event;
 
 /**
-TODO:
-  - Add validation to selector
-  - Fixed position: fixed scroll top
+  TODO:
+    - Add .destroy(), allows event listener removal too.
+    - Add a
 **/
 
 var lightbox = (function() {
@@ -16,7 +16,7 @@ var lightbox = (function() {
       isOpen: false,
       closeButton: currentConfig.closeButton,
       contentId: currentConfig.contentId,
-      toggle: currentConfig.toggle,
+      DOMActivation: currentConfig.DOMActivation,
       loadPersist: currentConfig.loadPersist,
       eventRegistry: {
         close: currentConfig.eventRegistry.close.slice(0),
@@ -38,7 +38,7 @@ var lightbox = (function() {
         isOpen: false,
         closeButton: currentConfig.closeButton,
         contentId: currentConfig.contentId,
-        toggle: currentConfig.toggle,
+        DOMActivation: currentConfig.DOMActivation,
         loadPersist: currentConfig.loadPersist,
         eventRegistry: {
           close: currentConfig.eventRegistry.close.slice(0),
@@ -67,7 +67,7 @@ var lightbox = (function() {
 
     defaultConfig = {
       isOpen: false,
-      toggle: false,
+      DOMActivation: false,
       loadPersist: false,
       eventRegistry: {
         close: [],
@@ -75,8 +75,6 @@ var lightbox = (function() {
         attach: []
       }
     };
-
-    this.scrollY = 0;
 
     this.config = config || defaultConfig;
 
@@ -89,7 +87,7 @@ var lightbox = (function() {
   Lightbox.prototype._buildDOM = function () {
 
     var lightboxContent = document.getElementById(this.config.contentId),
-        toggleControl = document.querySelector('[data-lightbox-toggle-control=' + this.config.contentId + ']'),
+        DOMActivationControl = document.querySelector('[data-lightbox-activation-control=' + this.config.contentId + ']'),
         closeButton = '',
         lightbox = document.createElement('div');
 
@@ -97,11 +95,11 @@ var lightbox = (function() {
       throw new Error('The lightbox content cannot be found.')
     }
 
-    if (this.config.toggle) {
-      if (!toggleControl) {
-        throw new Error('The toggle control cannot be found. Check a DOM node exists that has a [data-lightbox-toggle-control] attribute whose value corresponds to the ID of the lightbox content')
+    if (this.config.DOMActivation) {
+      if (!DOMActivationControl) {
+        throw new Error('The DOMActivation control cannot be found. Check a DOM node exists that has a [data-lightbox-activation-control] attribute whose value corresponds to the ID of the lightbox content')
       }
-      toggleControl.addEventListener('click', function(e) {
+      DOMActivationControl.addEventListener('click', function(e) {
         this.open('control');
       }.bind(this));
     }
@@ -148,7 +146,7 @@ var lightbox = (function() {
     return observers.add(this.config, eventType, callback);
   };
 
-  Lightbox.prototype.toggle = function () {
+  /*Lightbox.prototype.DOMActivation = function () {
 
     if (this.config.isOpen) {
       this.close();
@@ -156,7 +154,9 @@ var lightbox = (function() {
       this.open();
     }
 
-  };
+  };*/
+
+  //Lightbox.prototype.destroy = function () {};
 
   Lightbox.prototype.open = function (emitter) {
 
@@ -168,16 +168,10 @@ var lightbox = (function() {
 
     lightbox.classList.add(classes.open);
 
-    // Fix the viewport
-    this.scrollY = window.scrollY;
-
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
-    document.body.style.marginTop = - this.scrollY + 'px';
 
     this.config.isOpen = true;
-    this.config.emitter = emitter || 'system'
+    this.config.emitter = emitter || 'system';
     observers.notify(this, 'open');
 
     return this;
@@ -191,18 +185,13 @@ var lightbox = (function() {
     }
 
     document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.marginTop = '';
-
-    window.scrollTo(0, this.scrollY + 'px');
 
     var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
 
     lightbox.classList.remove(classes.open);
 
     this.config.isOpen = false;
-    this.config.emitter = emitter || 'system'
+    this.config.emitter = emitter || 'system';
 
     observers.notify(this, 'close');
 
