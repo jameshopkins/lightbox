@@ -36,6 +36,8 @@
 
         <div id="observers-one"><h1>Content for demo three</h1></div>
 
+        <div id="dom-interaction-one">content</div>
+
     </p>
 </div>
 
@@ -49,13 +51,14 @@
   var lightbox = skyComponents.lightbox
     .settings({ DOMActivation: true, loadPersist: true })
     .on('attach', function(lightbox) {
-      lightbox.close('wahey')
+      //lightbox.close('wahey')
     })
     .on('close', function(lightbox) {
-      console.log('closed by ' + lightbox.config.context)
+      //console.log('closed by ' + lightbox.config.context)
     })
     .attach('demo-one')
     .open()
+    .close()
 
   /*var stillNeedHelp = lightbox
     .settings({ toggle: true })

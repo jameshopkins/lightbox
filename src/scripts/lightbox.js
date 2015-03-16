@@ -2,6 +2,7 @@ require('../../bower_components/bskyb-polyfill/src/scripts/polyfill');
 
 var core = require('../../bower_components/bskyb-core/src/scripts/core');
 var event = core.event;
+var detect = core.detect;
 
 /**
   TODO:
@@ -94,6 +95,7 @@ var lightbox = (function() {
       throw new Error('The lightbox content cannot be found.')
     }
 
+    // Set up an internal
     if (this.config.DOMActivation) {
       if (!DOMActivationControl) {
         throw new Error('The DOMActivation control cannot be found. Check a DOM node exists that has a [data-lightbox-activation-control] attribute whose value corresponds to the ID of the lightbox content')
@@ -105,24 +107,31 @@ var lightbox = (function() {
 
     lightboxContent.parentNode.removeChild(lightboxContent);
 
+    // Add a close button if required
     if (this.config.closeButton !== null) {
       closeButton = '<button data-lightbox-control="close" class="close">Close</button>';
     }
 
-    // Transform the content
+    // Encapsulate the content in the various lightbox wrappers
     lightbox.classList.add('lightbox', this.config.contentId + '-lightbox');
     lightbox.setAttribute('data-lightbox-control', 'overlay');
     lightbox.innerHTML = '<div class="skycom-container lightbox-container"><div class="lightbox-content" role="dialog">' + closeButton + lightboxContent.outerHTML + '</div></div>';
 
     document.body.appendChild(lightbox);
 
-    var lightboxContent = lightbox.querySelector('.lightbox-content');
-
     // Set up close actions
     lightbox.addEventListener('click', function(e) {
       if (e.target.classList.contains('close') || e.target.classList.contains('lightbox')) {
         e.preventDefault();
         this.close(e.target.getAttribute('data-lightbox-control'));
+      }
+    }.bind(this));
+
+    // Ensure that all element states associated with opening a lightbox, are removed
+    // once the close animation has finished.
+    event.on(lightbox, 'animationend', function() {
+      if (this.config.context !== 'system' && !this.config.isOpen) {
+        lightbox.classList.remove('lightbox-closing', 'lightbox-open')
       }
     }.bind(this));
 
@@ -187,7 +196,13 @@ var lightbox = (function() {
 
     var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
 
-    lightbox.classList.remove(classes.open);
+    lightbox.classList.add('lightbox-closing');
+
+    if (!detect.css('animation')) {
+      setTimeout(function() {
+        lightbox.classList.remove('lightbox-closing', 'lightbox-open')
+      }.bind(this), 500);
+    }
 
     this.config.isOpen = false;
     this.config.context = context || 'system';

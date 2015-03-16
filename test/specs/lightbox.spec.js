@@ -146,6 +146,33 @@ describe('Lightbox', function () {
 
     });
 
+    it('all element states associated with opening a lightbox are removed once the close animation has finished', function (done) {
+
+      var lightbox = local['lightbox'];
+      lightbox
+        .attach('dom-interaction-one')
+        .open()
+        .close();
+
+      var visibility = [];
+      var overlay = document.querySelector('.dom-interaction-one-lightbox');
+      console.log(overlay.classList)
+      var checkVisibility = setInterval(function() {
+        var visible = false
+        if (visibility.length === 10) {
+          clearInterval(checkVisibility);
+          done()
+          //console.log(visibility)
+        }
+        console.log(overlay.classList);
+        if (overlay.classList.contains('lightbox-open')) {
+          visible = true;
+        }
+        visibility.push(visible)
+      }, 100)
+
+    })
+
     //it('clicking the overlay closes the lightbox', function () {
 
     //  var lightbox = local['lightbox'];
