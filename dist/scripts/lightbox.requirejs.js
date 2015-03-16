@@ -770,6 +770,12 @@ require('../../bower_components/bskyb-polyfill/src/scripts/polyfill');
 var core = require('../../bower_components/bskyb-core/src/scripts/core');
 var event = core.event;
 
+/**
+  TODO:
+    - Add .destroy(), allows event listener removal too.
+    - Add a
+**/
+
 var lightbox = (function() {
 
   function updateConfig (currentConfig, options) {
@@ -777,7 +783,7 @@ var lightbox = (function() {
       isOpen: false,
       closeButton: currentConfig.closeButton,
       contentId: currentConfig.contentId,
-      toggle: currentConfig.toggle,
+      DOMActivation: currentConfig.DOMActivation,
       loadPersist: currentConfig.loadPersist,
       eventRegistry: {
         close: currentConfig.eventRegistry.close.slice(0),
@@ -799,7 +805,7 @@ var lightbox = (function() {
         isOpen: false,
         closeButton: currentConfig.closeButton,
         contentId: currentConfig.contentId,
-        toggle: currentConfig.toggle,
+        DOMActivation: currentConfig.DOMActivation,
         loadPersist: currentConfig.loadPersist,
         eventRegistry: {
           close: currentConfig.eventRegistry.close.slice(0),
@@ -828,7 +834,7 @@ var lightbox = (function() {
 
     defaultConfig = {
       isOpen: false,
-      toggle: false,
+      DOMActivation: false,
       loadPersist: false,
       eventRegistry: {
         close: [],
@@ -847,34 +853,44 @@ var lightbox = (function() {
 
   Lightbox.prototype._buildDOM = function () {
 
-    if (this.config.toggle) {
-      var element = document.querySelector('[data-modal=' + this.config.contentId + ']');
-      element.addEventListener('click', function() {
-        this.toggle()
+    var lightboxContent = document.getElementById(this.config.contentId),
+        DOMActivationControl = document.querySelector('[data-lightbox-activation-control=' + this.config.contentId + ']'),
+        closeButton = '',
+        lightbox = document.createElement('div');
+
+    if (!lightboxContent) {
+      throw new Error('The lightbox content cannot be found.')
+    }
+
+    if (this.config.DOMActivation) {
+      if (!DOMActivationControl) {
+        throw new Error('The DOMActivation control cannot be found. Check a DOM node exists that has a [data-lightbox-activation-control] attribute whose value corresponds to the ID of the lightbox content')
+      }
+      DOMActivationControl.addEventListener('click', function(e) {
+        this.open('control');
       }.bind(this));
     }
 
-    var lightboxContent = document.getElementById(this.config.contentId);
+    lightboxContent.parentNode.removeChild(lightboxContent);
 
-    var closeButton = '';
     if (this.config.closeButton !== null) {
-      closeButton = '<button class="close">Close</button>';
+      closeButton = '<button data-lightbox-control="close" class="close">Close</button>';
     }
 
-    var lightbox = document.createElement('div');
-
+    // Transform the content
     lightbox.classList.add('lightbox', this.config.contentId + '-lightbox');
+    lightbox.setAttribute('data-lightbox-control', 'overlay');
     lightbox.innerHTML = '<div class="skycom-container lightbox-container"><div class="lightbox-content" role="dialog">' + closeButton + lightboxContent.outerHTML + '</div></div>';
 
-    lightboxContent.parentNode.replaceChild(lightbox, lightboxContent);
+    document.body.appendChild(lightbox);
 
-    var closeButton = lightbox.querySelector('button.close');
     var lightboxContent = lightbox.querySelector('.lightbox-content');
 
+    // Set up close actions
     lightbox.addEventListener('click', function(e) {
       if (e.target.classList.contains('close') || e.target.classList.contains('lightbox')) {
         e.preventDefault();
-        this.close();
+        this.close(e.target.getAttribute('data-lightbox-control'));
       }
     }.bind(this));
 
@@ -887,7 +903,6 @@ var lightbox = (function() {
     });
 
     updatedConfig._buildDOM();
-
     observers.notify(updatedConfig, 'attach');
 
     return updatedConfig;
@@ -898,7 +913,7 @@ var lightbox = (function() {
     return observers.add(this.config, eventType, callback);
   };
 
-  Lightbox.prototype.toggle = function () {
+  /*Lightbox.prototype.DOMActivation = function () {
 
     if (this.config.isOpen) {
       this.close();
@@ -906,9 +921,11 @@ var lightbox = (function() {
       this.open();
     }
 
-  };
+  };*/
 
-  Lightbox.prototype.open = function () {
+  //Lightbox.prototype.destroy = function () {};
+
+  Lightbox.prototype.open = function (emitter) {
 
     if (typeof this.config.contentId === 'undefined') {
       throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
@@ -918,25 +935,32 @@ var lightbox = (function() {
 
     lightbox.classList.add(classes.open);
 
-    observers.notify(this, 'open');
+    document.body.style.overflow = 'hidden';
+
     this.config.isOpen = true;
+    this.config.emitter = emitter || 'system';
+    observers.notify(this, 'open');
 
     return this;
 
   };
 
-  Lightbox.prototype.close = function () {
+  Lightbox.prototype.close = function (emitter) {
 
     if (typeof this.config.contentId === 'undefined') {
       throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
     }
 
+    document.body.style.overflow = '';
+
     var lightbox = document.querySelector('.' + this.config.contentId + '-lightbox');
 
     lightbox.classList.remove(classes.open);
 
-    observers.notify(this, 'close');
     this.config.isOpen = false;
+    this.config.emitter = emitter || 'system';
+
+    observers.notify(this, 'close');
 
     return this;
 
