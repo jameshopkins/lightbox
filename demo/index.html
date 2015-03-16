@@ -52,9 +52,10 @@
       lightbox.close('wahey')
     })
     .on('close', function(lightbox) {
-      console.log('closed by ' + lightbox.config.emitter)
+      console.log('closed by ' + lightbox.config.context)
     })
     .attach('demo-one')
+    .open()
 
   /*var stillNeedHelp = lightbox
     .settings({ toggle: true })

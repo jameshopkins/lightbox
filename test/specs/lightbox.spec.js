@@ -46,7 +46,7 @@ describe('Lightbox', function () {
         base = local['lightbox'].attach('demo-one');
         composed = base.open();
         expect(base.config.isOpen).toBeTruthy();
-        expect(base.config.emitter).toEqual('system');
+        expect(base.config.context).toEqual('system');
 
       });
 
@@ -55,7 +55,7 @@ describe('Lightbox', function () {
         base = local['lightbox'].attach('demo-one');
         composed = base.close();
         expect(base.config.isOpen).toBeFalsy();
-        expect(base.config.emitter).toEqual('system');
+        expect(base.config.context).toEqual('system');
 
       });
 

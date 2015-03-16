@@ -6,7 +6,6 @@ var event = core.event;
 /**
   TODO:
     - Add .destroy(), allows event listener removal too.
-    - Add a
 **/
 
 var lightbox = (function() {
@@ -158,7 +157,7 @@ var lightbox = (function() {
 
   //Lightbox.prototype.destroy = function () {};
 
-  Lightbox.prototype.open = function (emitter) {
+  Lightbox.prototype.open = function (context) {
 
     if (typeof this.config.contentId === 'undefined') {
       throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
@@ -171,14 +170,14 @@ var lightbox = (function() {
     document.body.style.overflow = 'hidden';
 
     this.config.isOpen = true;
-    this.config.emitter = emitter || 'system';
+    this.config.context = context || 'system';
     observers.notify(this, 'open');
 
     return this;
 
   };
 
-  Lightbox.prototype.close = function (emitter) {
+  Lightbox.prototype.close = function (context) {
 
     if (typeof this.config.contentId === 'undefined') {
       throw new Error('You cannot assign an interaction state to a lightbox that isnt\'t attached to a DOM node')
@@ -191,7 +190,7 @@ var lightbox = (function() {
     lightbox.classList.remove(classes.open);
 
     this.config.isOpen = false;
-    this.config.emitter = emitter || 'system';
+    this.config.context = context || 'system';
 
     observers.notify(this, 'close');
 
