@@ -46,23 +46,17 @@
 
 <script type="text/javascript">
 
-  /*function hello (contentId, lightbox) {
-    if (window.location.hash.substring(2) === contentId) {
-      lightbox.open();
-    } else {
-      lightbox.close();
-    }
-  };
-
   var lightbox = skyComponents.lightbox
-    .settings({ toggle: true, loadPersist: true })
-    .on('close', function() {
-      //console.log('mooo')
+    .settings({ DOMActivation: true, loadPersist: true })
+    .on('attach', function(lightbox) {
+      lightbox.close('wahey')
+    })
+    .on('close', function(lightbox) {
+      console.log('closed by ' + lightbox.config.emitter)
     })
     .attach('demo-one')
-    //.open()
 
-  var stillNeedHelp = lightbox
+  /*var stillNeedHelp = lightbox
     .settings({ toggle: true })
     .on('close', function(lightbox) {
       switch (lightbox.config.emitter) {
